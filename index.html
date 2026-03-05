@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Create Order</title>
+<title>Formulario Pedidos</title>
 
 <style>
 
@@ -69,34 +69,34 @@ font-weight:bold;
 
 <div class="container">
 
-<h2>Create Order</h2>
+<h2>Crear Pedido</h2>
 
 <div id="successMsg"></div>
 
 <form id="orderForm">
 
-<label>Order ID</label>
+<label>ID del pedido</label>
 <input id="order_id" readonly>
 
-<label>Customer</label>
+<label>Cliente</label>
 <select id="customer_id"></select>
 
-<label>Product</label>
+<label>Producto</label>
 <select id="sku"></select>
 
-<label>Quantity</label>
+<label>Cantidad</label>
 <input id="quantity" type="number">
 
-<label>Unit Price</label>
+<label>Precio</label>
 <input id="unit_price" readonly>
 
-<label>Date</label>
+<label>Fecha</label>
 <input id="order_date" type="date">
 
-<label>Channel</label>
+<label>Canal</label>
 <select id="channel"></select>
 
-<button type="submit">Create Order</button>
+<button type="submit">Crear pedido</button>
 
 </form>
 
@@ -202,7 +202,7 @@ setTimeout(()=>{ el.style.display="none"; },6000);
 function showSuccess(orderId){
 
 const msg=document.getElementById("successMsg");
-msg.textContent="Order "+orderId+" created successfully.";
+msg.textContent="Orden "+orderId+" creada con exito.";
 msg.style.display="block";
 
 setTimeout(()=>{
@@ -266,7 +266,7 @@ generateOrderId();
 showError("Network error: "+err.message);
 }finally{
 btn.disabled=false;
-btn.textContent="Create Order";
+btn.textContent="Registrar pedido";
 }
 
 });
@@ -280,3 +280,4 @@ loadChannels();
 
 </body>
 </html>
+
