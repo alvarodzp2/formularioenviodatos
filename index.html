@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create Order</title>
+
+<style>
+
+body{
+font-family:system-ui;
+background:#0f172a;
+color:white;
+padding:40px;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+background:#020617;
+padding:30px;
+border-radius:10px;
+border:1px solid #1e293b;
+}
+
+label{
+display:block;
+margin-top:15px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:5px;
+background:#0f172a;
+border:1px solid #1e293b;
+color:white;
+border-radius:6px;
+}
+
+button{
+margin-top:20px;
+padding:12px;
+width:100%;
+background:#38bdf8;
+border:none;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>Create Order</h2>
+
+<form id="orderForm">
+
+<label>Order ID</label>
+<input id="order_id" readonly>
+
+<label>Customer</label>
+<select id="customer_id"></select>
+
+<label>Product</label>
+<select id="sku"></select>
+
+<label>Quantity</label>
+<input id="quantity" type="number">
+
+<label>Unit Price</label>
+<input id="unit_price">
+
+<label>Date</label>
+<input id="order_date" type="date">
+
+<label>Channel</label>
+<select id="channel"></select>
+
+<button type="submit">Create Order</button>
+
+</form>
+
+</div>
+
+<script>
+
+const API="https://gedutofcipeyzdbbrupg.supabase.co/rest/v1";
+const KEY="sb_publishable_E4ruyIzTtJBsNt1Zs92VCQ_sZ7emINh";
+
+const HEADERS={
+apikey:KEY,
+Authorization:"Bearer "+KEY,
+"Content-Type":"application/json"
+};
+
+let prices={};
+
+async function generateOrderId(){
+
+const r=await fetch(API+"/orders?select=order_id&order=order_id.desc&limit=1",{headers:HEADERS});
+const data=await r.json();
+
+let next=1;
+
+if(data.length>0){
+
+const last=data[0].order_id.replace("O","");
+next=parseInt(last)+1;
+
+}
+
+document.getElementById("order_id").value="O"+String(next).padStart(6,"0");
+
+}
+
+async function loadCustomers(){
+
+const r=await fetch(API+"/customers?select=customer_id,name",{headers:HEADERS});
+const data=await r.json();
+
+const select=document.getElementById("customer_id");
+
+data.forEach(c=>{
+
+const opt=document.createElement("option");
+opt.value=c.customer_id;
+opt.textContent=c.customer_id+" - "+c.name;
+
+select.appendChild(opt);
+
+});
+
+}
+
+async function loadProducts(){
+
+const r=await fetch(API+"/products?select=sku,category,cost",{headers:HEADERS});
+const data=await r.json();
+
+const select=document.getElementById("sku");
+
+data.forEach(p=>{
+
+prices[p.sku]=p.cost;
+
+const opt=document.createElement("option");
+opt.value=p.sku;
+opt.textContent=p.sku+" - "+p.category;
+
+select.appendChild(opt);
+
+});
+
+}
+
+async function loadChannels(){
+
+const r=await fetch(API+"/orders?select=channel",{headers:HEADERS});
+const data=await r.json();
+
+const unique=[...new Set(data.map(x=>x.channel))];
+
+const select=document.getElementById("channel");
+
+unique.forEach(c=>{
+
+const opt=document.createElement("option");
+opt.value=c;
+opt.textContent=c;
+
+select.appendChild(opt);
+
+});
+
+}
+
+document.getElementById("sku").addEventListener("change",function(){
+
+const sku=this.value;
+
+document.getElementById("unit_price").value=prices[sku]||0;
+
+});
+
+document.getElementById("orderForm").addEventListener("submit",async e=>{
+
+e.preventDefault();
+
+const order={
+
+order_id:document.getElementById("order_id").value,
+customer_id:document.getElementById("customer_id").value,
+sku:document.getElementById("sku").value,
+quantity:parseInt(document.getElementById("quantity").value),
+unit_price:parseFloat(document.getElementById("unit_price").value),
+order_date:document.getElementById("order_date").value,
+channel:document.getElementById("channel").value
+
+};
+
+await fetch(API+"/orders",{
+method:"POST",
+headers:HEADERS,
+body:JSON.stringify(order)
+});
+
+generateOrderId();
+
+});
+
+generateOrderId();
+loadCustomers();
+loadProducts();
+loadChannels();
+
+</script>
+
+</body>
+</html>
